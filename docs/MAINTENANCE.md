@@ -1,9 +1,8 @@
 # 野路子手记维护指南
 
-这份文档留给站点维护者。博客公开地址：
+这份文档留给站点维护者。博客唯一公开地址：
 
-- GitHub Pages：<https://li-j-h.github.io/BlogLiaz/>
-- 备用地址：<https://wild-notes-2026.abc33094934.chatgpt.site>
+- GitHub Pages：<https://lijh1013.github.io/BlogLiaz/>
 
 ## 新增文章
 

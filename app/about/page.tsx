@@ -25,7 +25,7 @@ export default function AboutPage() {
             <p>野路子手记记录设计、代码和普通生活。这里不把个人做法写成标准答案；每篇文章会尽量说明过程、依据、限制，以及仍未解决的问题。</p>
             <p>目前的文章和网站源码都公开在 GitHub。如果发现错字、失效链接或技术问题，可以在仓库中提交 Issue。</p>
             <hr />
-            <p><strong>项目仓库</strong><br /><a href={siteConfig.repository} target="_blank" rel="noreferrer" aria-label="打开 BlogLiaz 的 GitHub 仓库（新窗口）">github.com/li-j-h/BlogLiaz ↗</a></p>
+            <p><strong>项目仓库</strong><br /><a href={siteConfig.repository} target="_blank" rel="noreferrer" aria-label="打开 BlogLiaz 的 GitHub 仓库（新窗口）">github.com/LiJH1013/BlogLiaz ↗</a></p>
             <p><strong>隐私说明</strong><br />本站当前不设置账户、不主动收集个人资料，也不使用广告追踪。详细内容请查看<Link href="/privacy">隐私页</Link>。</p>
             <Link className={styles.solidLink} href="/hello">去访客登记处 <span>→</span></Link>
           </div>
