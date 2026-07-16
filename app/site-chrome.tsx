@@ -13,7 +13,7 @@ export function SiteHeader() {
           <span>野</span><span>路</span><span>子</span>
         </Link>
         <PrimaryNavigation />
-        <span className={styles.headerMark}>✦</span>
+        <span className={styles.headerMark}>LIAZ</span>
       </header>
       <BackToTop />
     </>
