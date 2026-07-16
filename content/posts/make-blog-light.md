@@ -1,7 +1,7 @@
 ---
 title: 把个人博客重新做轻的三个决定
 date: 2026-07-12
-category: 建站笔记
+category: 前端
 summary: 少一点平台依赖和无效装饰，把注意力留给文字与阅读体验。
 tags: [博客、写作、设计]
 readingMinutes: 4

@@ -1,7 +1,7 @@
 ---
 title: 把一周的信息整理成可用笔记
 date: 2026-06-28
-category: 信息整理
+category: 随笔
 summary: 不是收藏更多，而是建立一条从阅读、摘录到行动的短路径。
 tags: [笔记、方法、信息]
 readingMinutes: 4

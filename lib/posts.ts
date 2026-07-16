@@ -10,6 +10,7 @@ export type Post = {
   summary: string;
   tags: string[];
   readingMinutes: number;
+  featured: boolean;
   published: boolean;
   body: string;
   html: string;
@@ -61,6 +62,7 @@ function createPost(path: string, source: string): Post {
     summary: data.summary,
     tags: parseTags(data.tags),
     readingMinutes: Number(data.readingMinutes || 4),
+    featured: data.featured === "true",
     published: data.published !== "false",
     body,
     html,

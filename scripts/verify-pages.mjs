@@ -9,6 +9,8 @@ const required = [
   "index.html",
   "articles/index.html",
   "articles/weekly-notes/index.html",
+  "articles/github-pages-basepath/index.html",
+  "articles/reliable-web-collector/index.html",
   "about/index.html",
   "privacy/index.html",
   "rss.xml",

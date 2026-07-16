@@ -8,13 +8,12 @@ import styles from "../site.module.css";
 export const metadata: Metadata = { title: "全部文章", description: "野路子手记的全部文章与写作归档。", alternates: { canonical: `${siteConfig.url}/articles` } };
 
 export default function ArticlesPage() {
-  const posts = getAllPosts().map(({ slug, title, date, category, summary, tags }) => ({ slug, title, date, category, summary, tags }));
+  const posts = getAllPosts().map(({ slug, title, date, category, summary, tags, readingMinutes, featured }) => ({ slug, title, date, category, summary, tags, readingMinutes, featured }));
   return (
     <div id="top" className={styles.siteShell}>
       <SiteHeader />
-      <main id="main-content" className={styles.pageMain}>
+      <main id="main-content" className={`${styles.pageMain} ${styles.archivePageMain}`}>
         <p className={styles.pageKicker}>ARCHIVE / 文章归档</p>
-        <h1 className={styles.pageTitle}>所有<br />文章</h1>
         <ArticleBrowser posts={posts} />
       </main>
       <SiteFooter />

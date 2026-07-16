@@ -1,7 +1,7 @@
 ---
 title: 从零开始部署一个静态网站
 date: 2026-06-09
-category: 前端实践
+category: 前端
 summary: 写给第一次发布网站的人，一份不绕弯的准备清单。
 tags: [部署、前端、新手]
 readingMinutes: 5

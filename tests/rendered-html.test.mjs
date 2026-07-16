@@ -11,7 +11,7 @@ async function request(path) {
 }
 
 test("renders the public blog routes", async () => {
-  const routes = ["/", "/articles", "/articles/weekly-notes", "/about", "/privacy"];
+  const routes = ["/", "/articles", "/articles/weekly-notes", "/articles/github-pages-basepath", "/articles/reliable-web-collector", "/about", "/privacy"];
   for (const route of routes) {
     const response = await request(route);
     assert.equal(response.status, 200, route);
@@ -37,11 +37,16 @@ test("publishes discovery files", async () => {
 
 test("renders verified copy and article navigation", async () => {
   const home = await (await request("/")).text();
+  const archive = await (await request("/articles")).text();
   const about = await (await request("/about")).text();
   const article = await (await request("/articles/weekly-notes")).text();
 
   assert.doesNotMatch(home, /读完《|走了十二公里/);
   assert.doesNotMatch(about, /TO BE CONTINUED|暂时用一张字卡/);
+  assert.match(home, /前端、爬虫与 AI 工程/);
+  assert.match(archive, /START HERE \/ 从这里开始/);
+  assert.match(archive, /按技术方向浏览/);
+  assert.match(archive, /查看全部(?:\s|<!--.*?-->)*07(?:\s|<!--.*?-->)*篇/);
   assert.match(article, /本文目录/);
   assert.match(article, /id="section-1"/);
   assert.match(article, /href="#section-1"/);

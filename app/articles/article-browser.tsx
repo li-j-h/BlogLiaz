@@ -1,16 +1,42 @@
 "use client";
 
 import Link from "next/link";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "../site.module.css";
 
-type BrowserPost = { slug: string; title: string; date: string; category: string; summary: string; tags: string[] };
+type BrowserPost = {
+  slug: string;
+  title: string;
+  date: string;
+  category: string;
+  summary: string;
+  tags: string[];
+  readingMinutes: number;
+  featured: boolean;
+};
+
+const topicOrder = ["前端", "爬虫", "AI", "随笔"];
+const topicDetails: Record<string, { index: string; description: string }> = {
+  前端: { index: "01", description: "界面、体验与部署" },
+  爬虫: { index: "02", description: "采集、清洗与稳定性" },
+  AI: { index: "03", description: "模型应用与工程实践" },
+  随笔: { index: "04", description: "偶尔记录普通生活" },
+};
 
 export function ArticleBrowser({ posts }: { posts: BrowserPost[] }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("全部");
+  const [searchActive, setSearchActive] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
-  const categories = ["全部", ...Array.from(new Set(posts.map((post) => post.category)))];
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const pointerFrame = useRef<number | null>(null);
+  const pointerPosition = useRef({ x: 0, y: 0 });
+  const featuredPost = posts.find((post) => post.featured) ?? posts[0];
+  const topics = topicOrder
+    .map((name) => ({ name, count: posts.filter((post) => post.category === name).length }))
+    .filter((topic) => topic.count > 0);
+
   const filtered = useMemo(() => {
     const keyword = query.trim().toLocaleLowerCase("zh-CN");
     return posts.filter((post) => {
@@ -37,29 +63,141 @@ export function ArticleBrowser({ posts }: { posts: BrowserPost[] }) {
     return () => window.removeEventListener("keydown", handleShortcut);
   }, []);
 
+  useEffect(() => () => {
+    if (pointerFrame.current !== null) cancelAnimationFrame(pointerFrame.current);
+  }, []);
+
+  function updateInkFollower(event: ReactPointerEvent<HTMLDivElement>) {
+    if (event.pointerType !== "mouse") return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    pointerPosition.current = { x: event.clientX - bounds.left, y: event.clientY - bounds.top };
+    event.currentTarget.dataset.pointerActive = "true";
+    if (pointerFrame.current !== null) return;
+    const target = event.currentTarget;
+    pointerFrame.current = requestAnimationFrame(() => {
+      target.style.setProperty("--cursor-x", `${pointerPosition.current.x}px`);
+      target.style.setProperty("--cursor-y", `${pointerPosition.current.y}px`);
+      pointerFrame.current = null;
+    });
+  }
+
+  function updateTilt(event: ReactPointerEvent<HTMLElement>, strength = 2.4) {
+    if (event.pointerType !== "mouse") return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+    event.currentTarget.style.setProperty("--tilt-x", `${(-y * strength).toFixed(2)}deg`);
+    event.currentTarget.style.setProperty("--tilt-y", `${(x * strength).toFixed(2)}deg`);
+    event.currentTarget.style.setProperty("--shadow-x", `${Math.round(-x * 14 + 10)}px`);
+    event.currentTarget.style.setProperty("--shadow-y", `${Math.round(-y * 14 + 10)}px`);
+  }
+
+  function resetTilt(event: ReactPointerEvent<HTMLElement>) {
+    event.currentTarget.style.setProperty("--tilt-x", "0deg");
+    event.currentTarget.style.setProperty("--tilt-y", "0deg");
+    event.currentTarget.style.setProperty("--shadow-x", "10px");
+    event.currentTarget.style.setProperty("--shadow-y", "10px");
+  }
+
+  function updateMagnet(event: ReactPointerEvent<HTMLButtonElement>) {
+    if (event.pointerType !== "mouse") return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+    event.currentTarget.style.setProperty("--magnet-x", `${(x * 8).toFixed(1)}px`);
+    event.currentTarget.style.setProperty("--magnet-y", `${(y * 6).toFixed(1)}px`);
+  }
+
+  function resetMagnet(event: ReactPointerEvent<HTMLButtonElement>) {
+    event.currentTarget.style.setProperty("--magnet-x", "0px");
+    event.currentTarget.style.setProperty("--magnet-y", "0px");
+  }
+
+  function selectCategory(nextCategory: string) {
+    setCategory(nextCategory);
+    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+    requestAnimationFrame(() => resultsRef.current?.scrollIntoView({ behavior, block: "start" }));
+  }
+
   function resetFilters() {
     setQuery("");
     setCategory("全部");
   }
 
   return (
-    <section className={styles.archive} aria-label="文章筛选与列表">
-      <div className={styles.filterBar}>
+    <section className={styles.archiveExperience} data-search-active={searchActive} aria-label="文章导航、筛选与列表">
+      <div
+        className={styles.archiveLead}
+        onPointerMove={updateInkFollower}
+        onPointerLeave={(event) => { event.currentTarget.dataset.pointerActive = "false"; }}
+      >
+        <h1 className={styles.archiveTitle}>所有<br />文章</h1>
+        <div className={styles.archiveIntro}>
+          <p className={styles.archiveStatement}>这里主要记录可复现的技术过程，也偶尔留下普通生活。</p>
+          <p>从前端、爬虫和 AI 开始，按兴趣选择方向，或者直接搜索一个问题。</p>
+          <button className={styles.archiveAllButton} type="button" aria-pressed={category === "全部"} onClick={() => selectCategory("全部")}>查看全部 {String(posts.length).padStart(2, "0")} 篇</button>
+        </div>
+      </div>
+
+      <div className={styles.topicMap} aria-label="按技术方向浏览">
+        {topics.map((topic) => {
+          const detail = topicDetails[topic.name];
+          return (
+            <button
+              className={styles.topicButton}
+              key={topic.name}
+              type="button"
+              aria-pressed={category === topic.name}
+              onClick={() => selectCategory(topic.name)}
+              onPointerMove={updateMagnet}
+              onPointerLeave={resetMagnet}
+            >
+              <span>{detail.index} / {String(topic.count).padStart(2, "0")}</span>
+              <strong>{topic.name}</strong>
+              <small>{detail.description}</small>
+              <b aria-hidden="true">↘</b>
+            </button>
+          );
+        })}
+      </div>
+
+      {featuredPost ? (
+        <Link
+          href={`/articles/${featuredPost.slug}`}
+          className={styles.featuredStory}
+          onPointerMove={(event) => updateTilt(event)}
+          onPointerLeave={resetTilt}
+        >
+          <span className={styles.featuredLabel}>START HERE / 从这里开始</span>
+          <span className={styles.featuredCopy}>
+            <small>{featuredPost.category} · {featuredPost.readingMinutes} 分钟</small>
+            <strong>{featuredPost.title}</strong>
+            <span>{featuredPost.summary}</span>
+          </span>
+          <span className={styles.featuredArrow} aria-hidden="true">↗</span>
+        </Link>
+      ) : null}
+
+      <div className={styles.filterBar} ref={resultsRef}>
         <div className={styles.searchField}>
-          <label htmlFor="article-search">搜索 <kbd>/</kbd></label>
+          <label htmlFor="article-search">搜索文章 <kbd>/</kbd></label>
           <span className={styles.searchControl}>
-            <input id="article-search" ref={searchRef} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="标题、摘要或标签" type="search" />
+            <input
+              id="article-search"
+              ref={searchRef}
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              onFocus={() => setSearchActive(true)}
+              onBlur={() => setSearchActive(false)}
+              placeholder="标题、摘要或标签"
+              type="search"
+            />
             {query ? <button type="button" onClick={() => setQuery("")} aria-label="清空搜索">清空</button> : null}
           </span>
         </div>
-        <div className={styles.filterGroup} role="group" aria-label="按分类筛选">
-          {categories.map((item) => (
-            <button key={item} type="button" aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>
-          ))}
-        </div>
         <div className={styles.resultSummary}>
-          <p className={styles.resultCount} aria-live="polite">{String(filtered.length).padStart(2, "0")} 篇文章</p>
-          {(query || category !== "全部") ? <button type="button" onClick={resetFilters}>重置筛选</button> : null}
+          <p className={styles.resultCount} aria-live="polite">{category === "全部" ? "全部方向" : category} / {String(filtered.length).padStart(2, "0")} 篇</p>
+          {(query || category !== "全部") ? <button type="button" onClick={resetFilters}>重置筛选</button> : <span>按时间倒序</span>}
         </div>
       </div>
 
@@ -67,7 +205,12 @@ export function ArticleBrowser({ posts }: { posts: BrowserPost[] }) {
         <div className={`${styles.postList} ${styles.articleGrid}`}>
           {filtered.map((post, index) => (
             <article className={styles.postRow} key={post.slug}>
-              <Link href={`/articles/${post.slug}`} className={styles.postLink}>
+              <Link
+                href={`/articles/${post.slug}`}
+                className={`${styles.postLink} ${styles.archivePostLink}`}
+                onPointerMove={(event) => updateTilt(event, 0.8)}
+                onPointerLeave={resetTilt}
+              >
                 <span className={styles.postNumber}>{String(index + 1).padStart(2, "0")}</span>
                 <span className={styles.postMeta}>{post.category}<br />{post.date.replaceAll("-", ".")}</span>
                 <span className={styles.postCopy}><strong>{post.title}</strong><small>{post.summary}</small></span>

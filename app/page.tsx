@@ -7,9 +7,9 @@ import { HeroDepth } from "./hero-depth";
 import styles from "./site.module.css";
 
 const notes = [
-  ["07.16", "文章已经改用 Markdown 管理，新增内容会自动进入归档、RSS 和站点地图。"],
-  ["07.16", "仓库现已公开，网站会通过 GitHub Pages 自动更新。"],
-  ["07.12", "首页保留三项主导航，把更多空间留给文章。"],
+  ["07.16", "文章归档加入技术方向导航、推荐阅读与鼠标响应。"],
+  ["07.16", "补充前端、爬虫与 AI 工程文章，技术主线现在更清楚。"],
+  ["07.12", "文章改用 Markdown 管理，更新会自动进入 RSS 与站点地图。"],
 ];
 
 export const metadata: Metadata = { alternates: { canonical: siteConfig.url } };
@@ -28,7 +28,7 @@ export default function Home() {
             <span lang="zh-CN" className={styles.heroAccent}>手记</span>
           </h1>
           <div className={`${styles.heroFoot} ${styles.enterThree}`}>
-            <p>关于设计、代码与普通生活。<br />不追热点，只记录值得复盘的过程。</p>
+            <p>关于前端、爬虫与 AI 工程。<br />偶尔也记录普通生活。</p>
             <a className={styles.roundLink} href="#featured" aria-label="向下查看精选文章">向下<br />阅读</a>
           </div>
           <HeroDepth />
