@@ -44,6 +44,7 @@ test("renders verified copy and article navigation", async () => {
 
   assert.doesNotMatch(home, /读完《|走了十二公里/);
   assert.doesNotMatch(about, /TO BE CONTINUED|暂时用一张字卡/);
+  assert.match(about, /作者 \/ LIAZ/);
   assert.match(home, /前端、爬虫与 AI 工程/);
   assert.match(home, />LIAZ<\/span>/);
   assert.match(archive, /START HERE \/ 从这里开始/);

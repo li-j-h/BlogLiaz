@@ -150,8 +150,9 @@
 .articleGrid { max-width: 1060px; margin-left: auto; }
 .archivePostLink { --tilt-x: 0deg; --tilt-y: 0deg; transform-origin: center; }
 .aboutGrid { display: grid; grid-template-columns: 1fr 1.35fr; gap: clamp(36px,8vw,120px); align-items: start; }
-.aboutPortrait { width: 88%; aspect-ratio: 4/5; box-sizing: border-box; justify-self: center; padding: 28px; display: flex; flex-direction: column; justify-content: space-between; background: var(--acid); box-shadow: 14px 14px 0 var(--ink); transform: rotate(-2deg); }
+.aboutPortrait { position: relative; width: 88%; aspect-ratio: 4/5; box-sizing: border-box; justify-self: center; padding: 28px; display: flex; flex-direction: column; justify-content: space-between; background: var(--acid); box-shadow: 14px 14px 0 var(--ink); transform: rotate(-2deg); }
 .aboutPortrait b { font: 900 clamp(60px,9vw,130px)/.78 var(--font-display); letter-spacing: -.06em; }
+.aboutAuthor { position: absolute; right: -10px; bottom: 76px; padding: 9px 12px 8px; border: 1px solid var(--ink); background: var(--accent); box-shadow: 4px 4px 0 var(--ink); font: 900 10px/1 var(--font-display); letter-spacing: .08em; transform: rotate(3deg); }
 .aboutCopy h2 { margin: 0 0 34px; font: 900 clamp(34px,5vw,66px)/1 var(--font-display); letter-spacing: -.035em; }
 .aboutCopy p { max-width: 56ch; font-size: 18px; line-height: 1.85; text-wrap: pretty; }
 .aboutCopy hr { margin: 48px 0; border: 0; border-top: 1px solid var(--ink); }

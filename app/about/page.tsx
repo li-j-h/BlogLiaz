@@ -17,6 +17,7 @@ export default function AboutPage() {
           <div className={styles.aboutPortrait} aria-label="野路子手记识别字卡">
             <span>WILD NOTES<br />SINCE 2026</span>
             <b>你<br />好</b>
+            <span className={styles.aboutAuthor}>作者 / LIAZ</span>
             <small>DESIGN / CODE / DAILY LIFE</small>
           </div>
           <div className={styles.aboutCopy}>
