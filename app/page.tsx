@@ -12,6 +12,24 @@ const notes = [
   ["07.12", "文章改用 Markdown 管理，更新会自动进入 RSS 与站点地图。"],
 ];
 
+const marqueePhrases = ["写下经验", "保留好奇", "持续更新"];
+const marqueeCycles = Array.from({ length: 4 });
+
+function MarqueeGroup() {
+  return (
+    <div className={styles.marqueeGroup}>
+      {marqueeCycles.flatMap((_, cycle) =>
+        marqueePhrases.map((phrase) => (
+          <span className={styles.marqueeItem} key={`${cycle}-${phrase}`}>
+            <span>{phrase}</span>
+            <b>✦</b>
+          </span>
+        )),
+      )}
+    </div>
+  );
+}
+
 export const metadata: Metadata = { alternates: { canonical: siteConfig.url } };
 
 export default function Home() {
@@ -34,10 +52,10 @@ export default function Home() {
           <HeroDepth />
         </section>
 
-        <div className={styles.marquee} aria-label="博客主题">
-          <div className={styles.marqueeTrack}>
-            <span>写下经验</span><b>✦</b><span>保留好奇</span><b>✦</b><span>持续更新</span><b>✦</b>
-            <span aria-hidden="true">写下经验</span><b aria-hidden="true">✦</b><span aria-hidden="true">保留好奇</span><b aria-hidden="true">✦</b><span aria-hidden="true">持续更新</span><b aria-hidden="true">✦</b>
+        <div className={styles.marquee} role="img" aria-label="博客主题：写下经验，保留好奇，持续更新">
+          <div className={styles.marqueeTrack} aria-hidden="true">
+            <MarqueeGroup />
+            <MarqueeGroup />
           </div>
         </div>
 
