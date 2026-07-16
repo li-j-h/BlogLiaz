@@ -1,5 +1,15 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
+
+const siteCss = await readFile(new URL("../app/site.module.css", import.meta.url), "utf8");
+
+function cssRule(selector) {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = siteCss.match(new RegExp(`${escaped}\\s*\\{([^}]*)\\}`));
+  assert.ok(match, `missing CSS rule: ${selector}`);
+  return match[1];
+}
 
 const workerUrl = new URL(`../dist/server/index.js?test=${Date.now()}`, import.meta.url);
 const { default: worker } = await import(workerUrl.href);
@@ -56,6 +66,8 @@ test("renders verified copy and article navigation", async () => {
   assert.match(home, /aria-label="进入文章归档页"/);
   assert.match(archive, /START HERE \/ 从这里开始/);
   assert.match(archive, /按技术方向浏览/);
+  assert.match(archive, /data-cursor-instrument="true"/);
+  assert.match(archive, /FRONT/);
   assert.match(archive, /查看全部(?:\s|<!--.*?-->)*07(?:\s|<!--.*?-->)*篇/);
   assert.match(resources, /RESOURCE FIELD \/ CURATED BY LIAZ/);
   assert.match(resources, /<span>资源<\/span><span>工作台<\/span>/);
@@ -63,4 +75,11 @@ test("renders verified copy and article navigation", async () => {
   assert.match(article, /本文目录/);
   assert.match(article, /id="section-1"/);
   assert.match(article, /href="#section-1"/);
+});
+
+test("keeps interactive article text out of transform layers", () => {
+  assert.doesNotMatch(cssRule(".postLink:hover"), /perspective|rotate|scale|translate3d/);
+  assert.doesNotMatch(cssRule(".topicButton"), /\btransform\s*:/);
+  assert.doesNotMatch(cssRule(".featuredStory"), /\btransform\s*:/);
+  assert.match(siteCss, /\.topicButton:hover::before/);
 });

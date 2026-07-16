@@ -30,6 +30,8 @@ export function ArticleBrowser({ posts }: { posts: BrowserPost[] }) {
   const [searchActive, setSearchActive] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const pointerInstrumentRef = useRef<HTMLDivElement>(null);
+  const pointerReadoutRef = useRef<HTMLElement>(null);
   const pointerFrame = useRef<number | null>(null);
   const pointerPosition = useRef({ x: 0, y: 0 });
   const featuredPost = posts.find((post) => post.featured) ?? posts[0];
@@ -77,24 +79,29 @@ export function ArticleBrowser({ posts }: { posts: BrowserPost[] }) {
     pointerFrame.current = requestAnimationFrame(() => {
       target.style.setProperty("--cursor-x", `${pointerPosition.current.x}px`);
       target.style.setProperty("--cursor-y", `${pointerPosition.current.y}px`);
+      if (pointerInstrumentRef.current) {
+        const x = Math.round(pointerPosition.current.x).toString().padStart(3, "0");
+        const y = Math.round(pointerPosition.current.y).toString().padStart(3, "0");
+        if (pointerReadoutRef.current) pointerReadoutRef.current.dataset.coordinate = `X ${x} / Y ${y}`;
+      }
       pointerFrame.current = null;
     });
   }
 
-  function updateTilt(event: ReactPointerEvent<HTMLElement>, strength = 2.4) {
+  function updateFeatureSpotlight(event: ReactPointerEvent<HTMLElement>) {
     if (event.pointerType !== "mouse") return;
     const bounds = event.currentTarget.getBoundingClientRect();
     const x = (event.clientX - bounds.left) / bounds.width - 0.5;
     const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-    event.currentTarget.style.setProperty("--tilt-x", `${(-y * strength).toFixed(2)}deg`);
-    event.currentTarget.style.setProperty("--tilt-y", `${(x * strength).toFixed(2)}deg`);
+    event.currentTarget.style.setProperty("--spot-x", `${((x + 0.5) * 100).toFixed(1)}%`);
+    event.currentTarget.style.setProperty("--spot-y", `${((y + 0.5) * 100).toFixed(1)}%`);
     event.currentTarget.style.setProperty("--shadow-x", `${Math.round(-x * 14 + 10)}px`);
     event.currentTarget.style.setProperty("--shadow-y", `${Math.round(-y * 14 + 10)}px`);
   }
 
-  function resetTilt(event: ReactPointerEvent<HTMLElement>) {
-    event.currentTarget.style.setProperty("--tilt-x", "0deg");
-    event.currentTarget.style.setProperty("--tilt-y", "0deg");
+  function resetFeatureSpotlight(event: ReactPointerEvent<HTMLElement>) {
+    event.currentTarget.style.setProperty("--spot-x", "72%");
+    event.currentTarget.style.setProperty("--spot-y", "38%");
     event.currentTarget.style.setProperty("--shadow-x", "10px");
     event.currentTarget.style.setProperty("--shadow-y", "10px");
   }
@@ -137,6 +144,19 @@ export function ArticleBrowser({ posts }: { posts: BrowserPost[] }) {
           <p>从前端、爬虫和 AI 开始，按兴趣选择方向，或者直接搜索一个问题。</p>
           <button className={styles.archiveAllButton} type="button" aria-pressed={category === "全部"} onClick={() => selectCategory("全部")}>查看全部 {String(posts.length).padStart(2, "0")} 篇</button>
         </div>
+        <div
+          className={styles.cursorInstrument}
+          data-cursor-instrument
+          ref={pointerInstrumentRef}
+          aria-hidden="true"
+        >
+          <span className={styles.cursorOuter} />
+          <span className={styles.cursorInner} />
+          <span className={styles.cursorSweep} />
+          <span className={styles.cursorDot} />
+          <i>FRONT</i><i>CRAWL</i><i>AI</i><i>LIFE</i>
+          <b data-coordinate="X 000 / Y 000" ref={pointerReadoutRef}>SCAN</b>
+        </div>
       </div>
 
       <div className={styles.topicMap} aria-label="按技术方向浏览">
@@ -165,8 +185,8 @@ export function ArticleBrowser({ posts }: { posts: BrowserPost[] }) {
         <Link
           href={`/articles/${featuredPost.slug}`}
           className={styles.featuredStory}
-          onPointerMove={(event) => updateTilt(event)}
-          onPointerLeave={resetTilt}
+          onPointerMove={updateFeatureSpotlight}
+          onPointerLeave={resetFeatureSpotlight}
         >
           <span className={styles.featuredLabel}>START HERE / 从这里开始</span>
           <span className={styles.featuredCopy}>
