@@ -7,6 +7,7 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const out = join(root, "out");
 const required = [
   "index.html",
+  "404.html",
   "articles/index.html",
   "articles/weekly-notes/index.html",
   "articles/github-pages-basepath/index.html",
@@ -27,6 +28,8 @@ const about = await readFile(join(out, "about", "index.html"), "utf8");
 const hello = await readFile(join(out, "hello", "index.html"), "utf8");
 const resources = await readFile(join(out, "resources", "index.html"), "utf8");
 const article = await readFile(join(out, "articles", "weekly-notes", "index.html"), "utf8");
+const relatedArticle = await readFile(join(out, "articles", "github-pages-basepath", "index.html"), "utf8");
+const notFound = await readFile(join(out, "404.html"), "utf8");
 const rss = await readFile(join(out, "rss.xml"), "utf8");
 const sitemap = await readFile(join(out, "sitemap.xml"), "utf8");
 
@@ -44,6 +47,10 @@ assert.match(resources, /RESOURCE FIELD \/ CURATED BY LIAZ/);
 assert.doesNotMatch(about, /TO BE CONTINUED|暂时用一张字卡/);
 assert.match(article, /href="#section-1"/);
 assert.match(article, /id="section-1"/);
+assert.match(article, /application\/ld\+json/);
+assert.match(article, /property="og:image"/);
+assert.match(relatedArticle, /RELATED \/ 同主题/);
+assert.match(notFound, /这条路还没有内容/);
 assert.match(rss, /https:\/\/lijh1013\.github\.io\/BlogLiaz\/articles\//);
 assert.match(rss, /atom:link/);
 assert.match(sitemap, /https:\/\/lijh1013\.github\.io\/BlogLiaz\/articles\//);

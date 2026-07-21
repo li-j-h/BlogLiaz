@@ -1,32 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import type { PointerEvent as ReactPointerEvent } from "react";
+import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { topicDefinitions, topicOrder, type PostCategory } from "@/lib/topics";
 import styles from "../site.module.css";
 
 type BrowserPost = {
   slug: string;
   title: string;
   date: string;
-  category: string;
+  category: PostCategory;
   summary: string;
   tags: string[];
   readingMinutes: number;
   featured: boolean;
 };
 
-const topicOrder = ["前端", "爬虫", "AI", "随笔"];
-const topicDetails: Record<string, { index: string; description: string }> = {
-  前端: { index: "01", description: "界面、体验与部署" },
-  爬虫: { index: "02", description: "采集、清洗与稳定性" },
-  AI: { index: "03", description: "模型应用与工程实践" },
-  随笔: { index: "04", description: "偶尔记录普通生活" },
-};
-
 export function ArticleBrowser({ posts }: { posts: BrowserPost[] }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("全部");
+  const [tag, setTag] = useState("");
   const [searchActive, setSearchActive] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [scanStatus, setScanStatus] = useState("准星已就绪");
@@ -48,10 +42,34 @@ export function ArticleBrowser({ posts }: { posts: BrowserPost[] }) {
     const keyword = query.trim().toLocaleLowerCase("zh-CN");
     return posts.filter((post) => {
       const inCategory = category === "全部" || post.category === category;
+      const hasTag = !tag || post.tags.includes(tag);
       const haystack = [post.title, post.summary, post.category, ...post.tags].join(" ").toLocaleLowerCase("zh-CN");
-      return inCategory && (!keyword || haystack.includes(keyword));
+      return inCategory && hasTag && (!keyword || haystack.includes(keyword));
     });
-  }, [category, posts, query]);
+  }, [category, posts, query, tag]);
+
+  useEffect(() => {
+    function restoreFilters() {
+      const params = new URLSearchParams(window.location.search);
+      const nextCategory = params.get("category");
+      setQuery(params.get("q") ?? "");
+      setCategory(nextCategory && topicOrder.includes(nextCategory as PostCategory) ? nextCategory : "全部");
+      setTag(params.get("tag") ?? "");
+    }
+    restoreFilters();
+    window.addEventListener("popstate", restoreFilters);
+    return () => window.removeEventListener("popstate", restoreFilters);
+  }, []);
+
+  function syncUrl(next: { query?: string; category?: string; tag?: string }) {
+    const params = new URLSearchParams(window.location.search);
+    const values = { query, category, tag, ...next };
+    if (values.query) params.set("q", values.query); else params.delete("q");
+    if (values.category !== "全部") params.set("category", values.category); else params.delete("category");
+    if (values.tag) params.set("tag", values.tag); else params.delete("tag");
+    const search = params.toString();
+    window.history.replaceState(null, "", `${window.location.pathname}${search ? `?${search}` : ""}${window.location.hash}`);
+  }
 
   useEffect(() => {
     function handleShortcut(event: KeyboardEvent) {
@@ -155,8 +173,16 @@ export function ArticleBrowser({ posts }: { posts: BrowserPost[] }) {
     });
   }
 
+  function handleLeadClick(event: ReactMouseEvent<HTMLDivElement>) {
+    const target = event.target as HTMLElement;
+    if (target.closest("a, button, input")) return;
+    triggerScan(event.currentTarget);
+  }
+
   function selectCategory(nextCategory: string) {
     setCategory(nextCategory);
+    setTag("");
+    syncUrl({ category: nextCategory, tag: "" });
     const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
     requestAnimationFrame(() => resultsRef.current?.scrollIntoView({ behavior, block: "start" }));
   }
@@ -164,13 +190,17 @@ export function ArticleBrowser({ posts }: { posts: BrowserPost[] }) {
   function resetFilters() {
     setQuery("");
     setCategory("全部");
+    setTag("");
+    syncUrl({ query: "", category: "全部", tag: "" });
   }
 
   return (
     <section className={styles.archiveExperience} data-search-active={searchActive} data-scanning={scanning} aria-label="文章导航、筛选与列表">
       <div
         className={styles.archiveLead}
+        data-scan-surface="true"
         ref={archiveLeadRef}
+        onClick={handleLeadClick}
         onPointerMove={updateInkFollower}
         onPointerLeave={(event) => { event.currentTarget.dataset.pointerActive = "false"; }}
       >
@@ -187,7 +217,7 @@ export function ArticleBrowser({ posts }: { posts: BrowserPost[] }) {
           ref={pointerInstrumentRef}
           type="button"
           aria-label="启动文章方向扫描特效"
-          onClick={(event) => triggerScan(event.currentTarget)}
+          onClick={(event) => { event.stopPropagation(); triggerScan(event.currentTarget); }}
         >
           <span className={styles.cursorOuter} aria-hidden="true" />
           <span className={styles.cursorInner} aria-hidden="true" />
@@ -199,9 +229,9 @@ export function ArticleBrowser({ posts }: { posts: BrowserPost[] }) {
         <p className={styles.scanStatus} aria-live="polite">{scanStatus}</p>
       </div>
 
-      <div className={styles.topicMap} aria-label="按技术方向浏览">
+      <div className={styles.topicMap} role="group" aria-label="按技术方向浏览">
         {topics.map((topic) => {
-          const detail = topicDetails[topic.name];
+          const detail = topicDefinitions[topic.name as PostCategory];
           return (
             <button
               className={styles.topicButton}
@@ -246,18 +276,18 @@ export function ArticleBrowser({ posts }: { posts: BrowserPost[] }) {
               id="article-search"
               ref={searchRef}
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => { setQuery(event.target.value); syncUrl({ query: event.target.value }); }}
               onFocus={() => setSearchActive(true)}
               onBlur={() => setSearchActive(false)}
               placeholder="标题、摘要或标签"
               type="search"
             />
-            {query ? <button type="button" onClick={() => setQuery("")} aria-label="清空搜索">清空</button> : null}
+            {query ? <button type="button" onClick={() => { setQuery(""); syncUrl({ query: "" }); }} aria-label="清空搜索">清空</button> : null}
           </span>
         </div>
         <div className={styles.resultSummary}>
-          <p className={styles.resultCount} aria-live="polite">{category === "全部" ? "全部方向" : category} / {String(filtered.length).padStart(2, "0")} 篇</p>
-          {(query || category !== "全部") ? <button type="button" onClick={resetFilters}>重置筛选</button> : <span>按时间倒序</span>}
+          <p className={styles.resultCount} aria-live="polite">{tag ? `#${tag}` : category === "全部" ? "全部方向" : category} / {String(filtered.length).padStart(2, "0")} 篇</p>
+          {(query || category !== "全部" || tag) ? <button type="button" onClick={resetFilters}>重置筛选</button> : <span>按时间倒序</span>}
         </div>
       </div>
 

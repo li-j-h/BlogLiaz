@@ -16,7 +16,9 @@ export function ResourceExplorer({ resources }: { resources: ResourceItem[] }) {
   const [savedOnly, setSavedOnly] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [spotlightId, setSpotlightId] = useState<string | null>(null);
+  const [randomStatus, setRandomStatus] = useState("");
   const pointerFrame = useRef<number | null>(null);
+  const pointerPosition = useRef({ x: 0, y: 0 });
   const copiedTimer = useRef<number | null>(null);
   const spotlightTimer = useRef<number | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -76,10 +78,13 @@ export function ResourceExplorer({ resources }: { resources: ResourceItem[] }) {
     if (event.pointerType !== "mouse") return;
     const target = event.currentTarget;
     const bounds = target.getBoundingClientRect();
-    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
-    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+    pointerPosition.current = {
+      x: (event.clientX - bounds.left) / bounds.width - 0.5,
+      y: (event.clientY - bounds.top) / bounds.height - 0.5,
+    };
     if (pointerFrame.current !== null) return;
     pointerFrame.current = requestAnimationFrame(() => {
+      const { x, y } = pointerPosition.current;
       target.style.setProperty("--field-x", `${(x * 9).toFixed(2)}deg`);
       target.style.setProperty("--field-y", `${(-y * 7).toFixed(2)}deg`);
       target.style.setProperty("--drift-x", `${(x * 18).toFixed(1)}px`);
@@ -121,14 +126,18 @@ export function ResourceExplorer({ resources }: { resources: ResourceItem[] }) {
   }
 
   function pickRandomResource() {
-    const picked = resources[Math.floor(Math.random() * resources.length)];
+    const pool = resources.length > 1 ? resources.filter((resource) => resource.id !== spotlightId) : resources;
+    const picked = pool[Math.floor(Math.random() * pool.length)];
     setQuery("");
     setCategory("全部");
     setSavedOnly(false);
     setSpotlightId(picked.id);
+    setRandomStatus(`已随机选中：${picked.title}`);
     const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      document.getElementById(`resource-${picked.id}`)?.scrollIntoView({ behavior, block: "center" });
+      const row = document.getElementById(`resource-${picked.id}`);
+      row?.scrollIntoView({ behavior, block: "center" });
+      row?.querySelector<HTMLAnchorElement>("h3 a")?.focus({ preventScroll: true });
     }));
     if (spotlightTimer.current !== null) window.clearTimeout(spotlightTimer.current);
     spotlightTimer.current = window.setTimeout(() => setSpotlightId(null), 2400);
@@ -216,7 +225,7 @@ export function ResourceExplorer({ resources }: { resources: ResourceItem[] }) {
               </span>
             </div>
 
-            <div className={styles.categoryFilters} aria-label="资源分类">
+            <div className={styles.categoryFilters} role="group" aria-label="资源分类">
               {categories.map((name) => (
                 <button
                   key={name}
@@ -243,6 +252,7 @@ export function ResourceExplorer({ resources }: { resources: ResourceItem[] }) {
               {(query || category !== "全部" || savedOnly) ? <button type="button" onClick={resetFilters}>重置</button> : <span>持续补充中</span>}
             </div>
             <span className={styles.copyStatus} role="status" aria-live="polite">{copiedId ? "链接已复制" : ""}</span>
+            <span className={styles.copyStatus} role="status" aria-live="polite">{randomStatus}</span>
           </div>
 
           {!savedReady && savedOnly ? (

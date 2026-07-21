@@ -1,5 +1,5 @@
 .helloShell { min-height: 100vh; overflow: clip; background: var(--paper); color: var(--ink); }
-.helloShell a:focus-visible, .helloShell button:focus-visible, .helloShell input:focus-visible, .helloShell textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+.helloShell a:focus-visible, .helloShell button:focus-visible, .helloShell input:focus-visible, .helloShell textarea:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; }
 .helloMain { padding: clamp(48px,6vw,82px) clamp(20px,4vw,64px) clamp(90px,12vw,170px); }
 .helloHeading { max-width: 1180px; margin: 0 auto clamp(48px,6vw,82px); display: grid; grid-template-columns: minmax(0,1.35fr) minmax(260px,.65fr); gap: 20px clamp(36px,7vw,112px); align-items: end; }
 .helloHeading > p { grid-column: 1 / -1; margin: 0; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
@@ -26,7 +26,7 @@
 .field input::placeholder, .field textarea::placeholder { color: color-mix(in oklab,var(--muted) 58%,transparent); }
 .field input:focus, .field textarea:focus { outline: 0; }
 .field em { min-height: 18px; color: var(--muted); font-size: 12px; font-style: normal; }
-.field[data-error="true"] em { color: var(--accent); font-weight: 800; }
+.field[data-error="true"] em { color: var(--ink); font-weight: 850; text-decoration: underline 3px var(--accent); text-underline-offset: 3px; }
 .topicField { min-width: 0; margin: 0; padding: 26px 0 24px; border: 0; border-bottom: 1px solid var(--ink); }
 .topicField legend { margin-bottom: 18px; padding: 0; }
 .topicField > div { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); }

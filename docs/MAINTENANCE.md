@@ -12,7 +12,7 @@
 ---
 title: 我的第一篇文章
 date: 2026-07-16
-category: 日常记录
+category: 随笔
 summary: 用一句话介绍这篇文章，建议控制在 40 字以内。
 tags: [生活、随笔]
 readingMinutes: 5
@@ -24,6 +24,7 @@ published: true
 
 - `published: true` 表示公开。
 - `published: false` 表示保留为草稿。
+- `category` 只能填写 `前端`、`爬虫`、`AI` 或 `随笔`，写错会在构建时直接提示。
 - 图片放在 `public/images/`，正文中使用 `/images/文件名.jpg`。
 
 保存后，首页、文章归档、RSS 和站点地图会自动更新。

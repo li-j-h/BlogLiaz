@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const siteCss = await readFile(new URL("../app/site.module.css", import.meta.url), "utf8");
+const articleBrowserSource = await readFile(new URL("../app/articles/article-browser.tsx", import.meta.url), "utf8");
 
 function cssRule(selector) {
   const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -52,6 +53,7 @@ test("renders verified copy and article navigation", async () => {
   const about = await (await request("/about")).text();
   const hello = await (await request("/hello")).text();
   const article = await (await request("/articles/weekly-notes")).text();
+  const relatedArticle = await (await request("/articles/github-pages-basepath")).text();
 
   assert.doesNotMatch(home, /读完《|走了十二公里/);
   assert.doesNotMatch(about, /TO BE CONTINUED|暂时用一张字卡/);
@@ -80,6 +82,9 @@ test("renders verified copy and article navigation", async () => {
   assert.match(article, /本文目录/);
   assert.match(article, /id="section-1"/);
   assert.match(article, /href="#section-1"/);
+  assert.match(article, /application\/ld\+json/);
+  assert.match(article, /property="og:image"/);
+  assert.match(relatedArticle, /RELATED \/ 同主题/);
 });
 
 test("keeps interactive article text out of transform layers", () => {
@@ -89,4 +94,12 @@ test("keeps interactive article text out of transform layers", () => {
   assert.match(siteCss, /\.topicButton:hover::before/);
   assert.match(siteCss, /@keyframes scanBurst/);
   assert.match(siteCss, /@keyframes topicScan/);
+  assert.match(siteCss, /\.articleBody pre\s*\{[^}]*overflow-x:\s*auto/);
+});
+
+test("keeps the archive scan effect clickable across the whole lead area", () => {
+  assert.match(articleBrowserSource, /data-scan-surface="true"/);
+  assert.match(articleBrowserSource, /onClick=\{handleLeadClick\}/);
+  assert.match(articleBrowserSource, /closest\("a, button, input"\)/);
+  assert.doesNotMatch(cssRule('.archiveLead[data-pointer-active="true"] .cursorInstrument'), /pointer-events:\s*auto/);
 });

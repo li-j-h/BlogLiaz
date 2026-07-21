@@ -9,5 +9,5 @@ export const siteConfig = {
   basePath: isGitHubPages ? "/BlogLiaz" : "",
   github: "https://github.com/LiJH1013",
   repository: "https://github.com/LiJH1013/BlogLiaz",
-  lastUpdated: "2026-07-16",
+  lastUpdated: "2026-07-21",
 };

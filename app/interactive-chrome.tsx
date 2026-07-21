@@ -24,7 +24,7 @@ export function PrimaryNavigation() {
         const active = normalizedPath === item.href || normalizedPath.startsWith(`${item.href}/`);
         return <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined}>{item.label}</Link>;
       })}
-      <a href={siteConfig.repository} target="_blank" rel="noreferrer" aria-label="GitHub 仓库（在新窗口打开）">GitHub</a>
+      <a className={styles.navExternal} href={siteConfig.repository} target="_blank" rel="noreferrer" aria-label="GitHub 仓库（在新窗口打开）">GitHub</a>
     </nav>
   );
 }

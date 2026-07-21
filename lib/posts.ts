@@ -1,12 +1,13 @@
 import { marked } from "marked";
 import { rawPosts } from "@/content/posts.generated";
 import { siteConfig } from "@/lib/site";
+import { isPostCategory, type PostCategory } from "@/lib/topics";
 
 export type Post = {
   slug: string;
   title: string;
   date: string;
-  category: string;
+  category: PostCategory;
   summary: string;
   tags: string[];
   readingMinutes: number;
@@ -45,6 +46,9 @@ function createPost(path: string, source: string): Post {
   }
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
     throw new Error(`${path} 的文件名只能使用小写英文、数字和连字符`);
+  }
+  if (!isPostCategory(data.category)) {
+    throw new Error(`${path} 的 category 必须是：前端、爬虫、AI、随笔`);
   }
   const tableOfContents: { id: string; title: string }[] = [];
   const html = (marked.parse(body) as string).replace(/<h2>([\s\S]*?)<\/h2>/g, (heading, content) => {

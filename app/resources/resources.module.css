@@ -7,7 +7,7 @@
 .resourcePage a:focus-visible,
 .resourcePage button:focus-visible,
 .resourcePage input:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--ink);
   outline-offset: 4px;
 }
 
@@ -515,8 +515,8 @@
   .pickList { grid-template-columns: 1fr; }
   .pickList a, .pickList a:first-child { min-height: 260px; grid-row: auto; border-right: 0; }
   .indexNote { max-width: 28ch; }
-  .resourceControls { top: 76px; }
-  .resourceRow { scroll-margin-top: 330px; grid-template-columns: 34px minmax(0,1fr); gap: 14px; }
+  .resourceControls { position: static; }
+  .resourceRow { scroll-margin-top: 96px; grid-template-columns: 34px minmax(0,1fr); gap: 14px; }
   .resourceActions { grid-column: 2; grid-template-columns: 1fr 1fr; }
   .resourceRow[data-spotlight="true"] { padding-inline: 10px; transform: translate(-4px,-4px); }
 }
